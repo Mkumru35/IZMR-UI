@@ -11,6 +11,8 @@ export class AuthService {
   identityCheck() {
     const token: string = localStorage.getItem("accessToken");  
     let expired: boolean;
+    
+    
     try {
       expired = this.jwtHelper.isTokenExpired(token);
     } catch {

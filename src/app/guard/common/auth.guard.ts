@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerService } from 'ngx-spinner'; 
 import { ToastrService } from 'ngx-toastr';
 import { SpinnerType } from 'src/app/base/base.component';
 import { _isAuthenticated } from 'src/app/services/common/auth.service';
@@ -9,14 +9,11 @@ import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/
 
 export const authGuardFn: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const jwtHelper = new JwtHelperService();
+  const spinner = new NgxSpinnerService();  
+  spinner.show(SpinnerType.BallAtom);  
 
-  const router = new Router();
-
-  const spinner = new NgxSpinnerService();
-  
-  spinner.show(SpinnerType.BallAtom);   
   if (!_isAuthenticated) {
-    router.navigate(["login"], { queryParams: { returnUrl: state.url } });
+    inject(Router).navigate(["login"], { queryParams: { returnUrl: state.url } });
     inject(CustomToastrService).message("Oturum açmanız gerekiyor!", "Yetkisiz Erişim!", {
       messageType: ToastrMessageType.Warning,
       position: ToastrPosition.TopRight

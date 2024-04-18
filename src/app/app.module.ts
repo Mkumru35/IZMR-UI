@@ -1,4 +1,3 @@
-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core'; 
 import { FormsModule } from '@angular/forms';
@@ -11,8 +10,8 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { AppRoutingModule } from './app-routing.module';
 import { UiModule } from './ui/ui.module';
 import { HttpErrorHandlerInterceptorService } from './services/common/http-error-handler-interceptor.service';
-
 import { JwtModule } from '@auth0/angular-jwt';
+import { CompanyInterceptorService } from './services/common/company-interceptor.service';
 
 @NgModule({
   declarations: [
@@ -30,7 +29,7 @@ import { JwtModule } from '@auth0/angular-jwt';
     JwtModule.forRoot({
       config: {
         tokenGetter: () => localStorage.getItem("accessToken"),
-        allowedDomains: ["https://localhost:7266"]
+        allowedDomains: ["localhost:7266"]
       }
     }) 
 
@@ -41,7 +40,8 @@ import { JwtModule } from '@auth0/angular-jwt';
       useClass: PathLocationStrategy
     }
     , { provide: "baseUrl", useValue: "https://localhost:7266/api", multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorHandlerInterceptorService, multi: true } 
+    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorHandlerInterceptorService, multi: true } ,
+    { provide: HTTP_INTERCEPTORS, useClass: CompanyInterceptorService, multi: true }
      
   ],
   bootstrap: [AppComponent]

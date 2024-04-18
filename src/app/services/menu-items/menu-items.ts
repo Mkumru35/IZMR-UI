@@ -8,7 +8,7 @@ export interface Menu {
 }
 
 const MENUITEMS = [ 
-  { state: 'finance', type: 'link', name: 'Rapor', icon: 'grid_on' },
+   
   { state: 'financeDetail', type: 'link', name: 'Rapor2', icon: 'grid_on' },
 ];
 

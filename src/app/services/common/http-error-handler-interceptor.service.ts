@@ -5,6 +5,8 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { catchError, Observable, of } from 'rxjs';
 import { SpinnerType } from '../../base/base.component';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from '../toastr.services/custom-toastr.service';
+import { UserAuthService } from '../model/user-auth.service';
+import { AuthService } from './auth.service';
  
  
 
@@ -13,12 +15,24 @@ import { CustomToastrService, ToastrMessageType, ToastrPosition } from '../toast
 })
 export class HttpErrorHandlerInterceptorService implements HttpInterceptor {
 
-  constructor(private toastrService: CustomToastrService,private router: Router, private spinner: NgxSpinnerService) { }
+  constructor(private authService:AuthService,private toastrService: CustomToastrService,private router: Router, private spinner: NgxSpinnerService,private userAuthService:UserAuthService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     return next.handle(req).pipe(catchError(error => {
       switch (error.status) {
+        case HttpStatusCode.Unauthorized:
+
+        this.userAuthService.refreshTokenLogin(localStorage.getItem("refreshToken"),localStorage.getItem("username"),(data)=>{
+          if (data==false) {
+            this.router.navigateByUrl('/login');
+            this.toastrService.message("Bu işlemi yapmaya yetkiniz bulunmamaktadır!", "Yetkisiz işlem!", {
+              messageType: ToastrMessageType.Warning,
+              position: ToastrPosition.BottomFullWidth
+            });
+          } 
+         }).then(data =>{});
+        break;
        
         case HttpStatusCode.InternalServerError:
           this.toastrService.message("Sunucuya erişilmiyor!", "Sunucu hatası!", {

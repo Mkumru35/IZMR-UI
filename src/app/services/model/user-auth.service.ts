@@ -3,6 +3,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from '../toastr.services/custom-toastr.service';
 import { HttpClientService } from '../common/http-client-service';
 import { TokenResponse } from 'src/app/contracts/token/tokenResponse';
+import { Login } from 'src/app/contracts/login';
  
 
 @Injectable({
@@ -11,13 +12,13 @@ import { TokenResponse } from 'src/app/contracts/token/tokenResponse';
 export class UserAuthService {
   constructor(private httpClientService: HttpClientService, private toastrService: CustomToastrService) { }
 
-  async login(userNameOrEmail: string, password: string, callBackFunction?: () => void,errorCallBack?:(errorMessage:string)=>void): Promise<any> {
+  async login(login:Login, callBackFunction?: () => void,errorCallBack?:(errorMessage:string)=>void): Promise<any> {
     const observable: Observable<any | TokenResponse> = this.httpClientService.post<any | TokenResponse>({
       controller: "auth",
       action: "login"
-    }, { userNameOrEmail, password }) 
+    }, { login }) 
 
-    const tokenResponse: TokenResponse = await firstValueFrom(observable).catch(error=>errorCallBack(error)) as TokenResponse;
+    const tokenResponse: TokenResponse = await firstValueFrom(observable).catch(error=>errorCallBack(error.message)) as TokenResponse;
 
     if (tokenResponse) {
       localStorage.setItem("accessToken", tokenResponse.token.accessToken);
@@ -32,11 +33,11 @@ export class UserAuthService {
     callBackFunction();
   }
 
-  async refreshTokenLogin(refreshToken: string, callBackFunction?: (state) => void): Promise<any> {
+  async refreshTokenLogin(refreshToken: string,userName:string, callBackFunction?: (state) => void): Promise<any> {
     const observable: Observable<any | TokenResponse> = this.httpClientService.post({
       action: "refreshtokenlogin",
       controller: "auth"
-    }, { refreshToken: refreshToken });
+    }, { refreshToken: refreshToken ,userName:userName});
 
     try {
       const tokenResponse: TokenResponse = await firstValueFrom(observable) as TokenResponse;
@@ -48,6 +49,8 @@ export class UserAuthService {
 
       callBackFunction(tokenResponse ? true : false);
     } catch {
+     
+      
       callBackFunction(false);
     }
   }

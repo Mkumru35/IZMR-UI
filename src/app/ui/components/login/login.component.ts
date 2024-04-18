@@ -1,11 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import {  Component, OnInit } from '@angular/core';
+import {   UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
-import { Branch, ListBranch } from 'src/app/contracts/ListBranch';
+import { Branch } from 'src/app/contracts/ListBranch';
+import { Business } from 'src/app/contracts/ListBusiness';
 import { ListCompany } from 'src/app/contracts/ListCompany';
+import { Login } from 'src/app/contracts/login';
+import { AuthService } from 'src/app/services/common/auth.service';
 import { CompanyService } from 'src/app/services/model/company.service';
- 
+
 import { UserAuthService } from 'src/app/services/model/user-auth.service';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/toastr.services/custom-toastr.service';
 
@@ -16,49 +20,94 @@ import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/
 })
 export class LoginComponent extends BaseComponent implements OnInit {
   selectedCompany: string = '';
-  defaultBranchCode:any
-  listCompany:ListCompany[];
-  listBranch:Branch[];
- 
-  constructor(private userAuthService: UserAuthService, spinner: NgxSpinnerService,   private activatedRoute: ActivatedRoute, private router: Router,private companyService:CompanyService,private customToastrService:CustomToastrService) {
+  defaultBranchCode: any
+  defaultBusinessCode: any
+  listCompany: ListCompany[];
+  listBranch: Branch[];
+  listBusiness: Business[];
+  frm: UntypedFormGroup;
+   
+
+  constructor(private authService:AuthService,private formBuilder: UntypedFormBuilder, private userAuthService: UserAuthService, spinner: NgxSpinnerService, private activatedRoute: ActivatedRoute, private router: Router, private companyService: CompanyService, private customToastrService: CustomToastrService) {
     super(spinner)
-    
+
   }
-  errorMesaj(error:string){
-    this.customToastrService.message(error,"Hata",{messageType:ToastrMessageType.Error,position:ToastrPosition.TopRight})
+  get component() {
+    return this.frm.controls;
+ }
+  errorMesaj(error: string) {
+    this.customToastrService.message(error, "Hata", { messageType: ToastrMessageType.Error, position: ToastrPosition.TopRight })
   }
-  async ngOnInit()  {
+ 
+  async ngOnInit() {
+
+    this.frm = this.formBuilder.group({
+      company: ["", Validators.required],
+      branch: ["", Validators.required],
+      business: ["", Validators.required],
+      username: ["", [
+        Validators.required,
+        Validators.maxLength(50),
+        Validators.minLength(3)
+      ]],
+      password: ["", Validators.required],
+
+    })
     this.showSpinner(SpinnerType.BallScaleMultiple)
-    this.listCompany=(await this.companyService.getCompany(()=>{},(error)=>{this.errorMesaj(error)})).companyName;   
+    this.listCompany = (await this.companyService.getCompany(() => { }, (error) => { this.errorMesaj(error)  })).companyName;
     this.hideSpinner(SpinnerType.BallScaleMultiple)
-    console.log(this.listCompany,"this.listCompany=");
-    
-  }
 
-  async selectRequestBrach(company:any){   
-    this.showSpinner(SpinnerType.BallScaleMultiple) 
-    const data = await this.companyService.getBrach(company,()=>{},(error)=>{this.errorMesaj(error)}) 
-    this.listBranch=data.branch;  
-    this.defaultBranchCode='0'
-    console.log(this.listBranch,"this.listBranch");
-      
-    this.hideSpinner(SpinnerType.BallScaleMultiple)
+
+  
+ 
+   
   }
 
 
-  async login(usernameOrEmail: string, password: string,company:string,branch:string) {
-    console.log(company +branch,"sss");
+
+  async selectRequestBrach(company: any,businessCode:string) {
+    this.showSpinner(SpinnerType.BallScaleMultiple)
+    const data = await this.companyService.getBrach(company, businessCode,() => { }, (error) => { this.errorMesaj(error) })
+    this.listBranch = data.branch;
+    this.defaultBranchCode = '0'
+    this.hideSpinner(SpinnerType.BallScaleMultiple)
+  }
+
+  async selectRequestBusiness(company:string)
+  {
+    this.showSpinner(SpinnerType.BallScaleMultiple)
+    const business= await this.companyService.getBusiness(company,()=>{},(error=>{      
+      this.hideSpinner(SpinnerType.BallScaleMultiple)}));
+    this.listBusiness=business.business;
+    this.hideSpinner(SpinnerType.BallScaleMultiple)
+
+
+  }
+
+  submitted: boolean = false;
+  async Login(login: Login) {
+    this.submitted = true;
+    this.authService.identityCheck();
     
+    if (this.frm.invalid)
+      return;
     this.showSpinner(SpinnerType.BallAtom);
-    await this.userAuthService.login(usernameOrEmail, password, () => { 
-
-      this.activatedRoute.queryParams.subscribe(params => {
-        
-        const returnUrl: string = params["returnUrl"];
-        if (returnUrl)
-          this.router.navigate([returnUrl]);
-      });
-      this.hideSpinner(SpinnerType.BallAtom);
-    },(error)=>{this.errorMesaj(error)});
+    await this.userAuthService.login(login, () => {
+      this.router.navigate(["financeDetail"]);
+      
+    }, (error) => { this.errorMesaj(error) });
+    this.hideSpinner(SpinnerType.BallAtom)
+   this.saveToLocalStorage(login)//kullanıcı giriş bilgilerini tutuyorz
   }
+
+  saveToLocalStorage(prop:Login){
+
+    localStorage.setItem('company', prop.company);
+    localStorage.setItem('business', prop.business);
+    localStorage.setItem('branch', prop.branch);
+    localStorage.setItem('username', prop.username);
+    localStorage.setItem('password', prop.password);
+  }
+
+
 }

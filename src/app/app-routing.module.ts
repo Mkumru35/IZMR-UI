@@ -6,9 +6,8 @@ import { authGuardFn } from './guard/common/auth.guard';
 
 const routes: Routes = [
 
-  { path: "", component: HomeComponent },
-  { path: "login",loadChildren:()=>import("./ui/components/login/login.module").then(module=>module.LoginModule)},
-  { path: "finance", loadChildren:()=>import("./ui/components/finance/finance.module").then(module=>module.FinanceModule),canActivate:[authGuardFn]},
+  { path: "", component: HomeComponent ,canActivate:[authGuardFn]},
+  { path: "login",loadChildren:()=>import("./ui/components/login/login.module").then(module=>module.LoginModule)},   
   { path: "financeDetail", loadChildren:()=>import("./ui/components/finance-detail/finance-detail.module").then(module=>module.FinanceDetailModule),canActivate:[authGuardFn]},
   { path: "financeDetail/:pageNo", loadChildren:()=>import("./ui/components/finance-detail/finance-detail.module").then(module=>module.FinanceDetailModule),canActivate:[authGuardFn]},
   

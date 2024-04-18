@@ -1,37 +1,56 @@
 <div class="row">
   <div class="col-md-3"></div>
   <div class="col-md-6">
+    <form [formGroup]="frm" (ngSubmit)="Login(frm.value)">
+      <div class="form-group">
+        <label for="company">Şirket</label>
+        <select #selectCompany name="company" formControlName="company" class="form-select"
+          aria-label="Default select example" (change)="selectRequestBusiness(selectCompany.value)">
+          <option [ngValue]="null" disabled selected>Lütfen şirket seçiniz</option>
+          <option *ngFor="let company of listCompany" [value]="company.companyName">{{ company.companyName }}</option>
+        </select>
+        <small class="form-text text-muted invalid-feedback" style="display: table-row-group;" *ngIf="submitted && component.company.errors?.required">
+          Lütfen bir şirket seçiniz.
+        </small>
+      </div>
+      
 
-    <div class="form-group">
-      <label for="company">Şirket</label>
-      <select #selectCompany name="company" class="form-select" aria-label="Default select example" (change)="selectRequestBrach(selectCompany.value)">         
-        <option disabled selected>Select company</option>
-        <option *ngFor="let company of listCompany" [value]="company.companyName">{{ company.companyName }}</option>
-      </select>
-    </div>
-    
-    <div class="form-group">
-      <label for="branch">İşletme</label>
-      <select #selectBranch id="branch" class="form-select" aria-label="Default select example" [(ngModel)]="defaultBranchCode">         
-        <option *ngFor="let branch of listBranch" [value]="branch.branchCode">{{ branch.branchName }}</option>
-       
-      </select>
-    </div>
- 
-    <div class="form-group">
-      <label for="username">Kullanıcı Adı</label>
-      <input #txtUsernameOrEmail type="text" class="form-control" id="username" placeholder="Kullanıcı Adı & Email">
-      <small class="form-text text-muted invalid-feedback">***</small>
-    </div>
-    <div class="form-group">
-      <label for="password">Şifre</label>
-      <input #txtPassword type="password" class="form-control" id="password" placeholder="Şifre">
-    </div>      
+      <div class="form-group">
+        <label for="business">İşletme</label>
+        <select #selectBranch formControlName="business" id="business" class="form-select"
+          aria-label="Default select example" [(ngModel)]="defaultBusinessCode"  (change)="selectRequestBrach(selectCompany.value,selectBranch.value)" >
+          <option *ngFor="let business of listBusiness" [value]="business.businessCode">{{ business.businessName }}</option>
+        </select>
+        <small class="form-text text-muted invalid-feedback" style="display: table-row-group;" *ngIf="submitted && component.business.errors?.required">
+          Lütfen bir İşletme seçiniz.
+        </small>
+      </div>
+      <div class="form-group">
+        <label for="branch">Şube</label>
+        <select #selectBranch formControlName="branch" id="branch" class="form-select"
+          aria-label="Default select example" [(ngModel)]="defaultBranchCode">
+          <option *ngFor="let branch of listBranch" [value]="branch.branchCode">{{ branch.branchCode }}-{{ branch.branchName }}</option>
+        </select>
+        <small class="form-text text-muted invalid-feedback" style="display: table-row-group;" *ngIf="submitted && component.branch.errors?.required">
+          Lütfen bir Şube seçiniz.
+        </small>
+      </div>
+      <div class="form-group">
+        <label for="username">Kullanıcı Adı</label>
+        <input type="text" formControlName="username" class="form-control" id="username"
+          [ngClass]="{'is-invalid': submitted && component.username.errors}" placeholder="Kullanıcı Adı">
+        <small class="form-text text-muted invalid-feedback"
+          *ngIf="submitted && component.username.errors?.required">Lütfen kullanıcı adını boş geçmeyiniz.</small>
+      </div>
+      <div class="form-group">
+        <label for="password">Şifre</label>
+        <input type="password" formControlName="password" class="form-control" id="password" placeholder="Şifre"
+          [ngClass]="{'is-invalid': submitted && component.password.errors}">
+      </div>
 
-    <br />
-    <button style="margin-top:5px;" type="submit" class="btn btn-primary" (click)="login(txtUsernameOrEmail.value, txtPassword.value,selectCompany.value,selectBranch.value)">Giriş Yap</button>
-
- 
+      <br />
+      <button type="submit" class="btn btn-primary">Giriş yap</button>
+    </form>
 
   </div>
   <div class="col-md-3"></div>
